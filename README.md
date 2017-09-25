@@ -11,7 +11,7 @@ This paper presents an efficient and robust approach for reducing the size of de
 
 ## Example
 
-Running the `main.py script`, the LeNet will be trained on Mnist dataset (LMDBs provided in Dataset folder), and iteratively the number of weights is reduced by removing neurons in the fc3 (see paper for details), based on the number of input-neurons per maxout unit. THe idea is to reduced the network withouth affecting negatively the performance.
+Running the `main.py` script, the LeNet will be trained on Mnist dataset (LMDBs provided in Dataset folder), and iteratively the number of weights is reduced by removing neurons in the fc3 (see paper for details), based on the number of input-neurons per maxout unit. THe idea is to reduced the network withouth affecting negatively the performance.
 
 
 If you use the code for scientific purposes, please cite
