@@ -1,0 +1,16 @@
+train_net: "../mnist_prototxt/mnist_train_2.prototxt"
+test_net: "../mnist_prototxt/mnist_test_2.prototxt"
+test_iter: 0
+test_interval: 2813
+base_lr: 0.010000
+lr_policy: "inv"
+gamma: 0.0001
+power: 0.75
+display: 2813
+iter_size: 1
+max_iter: 2812
+momentum: 0.9
+weight_decay: 0.0005
+average_loss: 2813
+snapshot: 0
+solver_mode: GPU

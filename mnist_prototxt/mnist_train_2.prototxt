@@ -1,0 +1,159 @@
+#mnist_maxout_2 train 
+layer {
+  name: "images"
+  type: "Data"
+  top: "images"
+  top: "label"
+  transform_param {
+    scale: 0.00392156862745
+  }
+  data_param {
+    source: "/home/fmoya/Work/Mnist/mnist_train_lmdb/"
+    batch_size: 64
+    backend: LMDB
+    prefetch: 20
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "images"
+  top: "conv1"
+  convolution_param {
+    num_output: 20
+    kernel_size: 5
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "pool1"
+  top: "conv2"
+  convolution_param {
+    num_output: 52
+    kernel_size: 5
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "pool2"
+  type: "Pooling"
+  bottom: "conv2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "fc_3"
+  type: "InnerProduct"
+  bottom: "pool2"
+  top: "fc_3"
+  inner_product_param {
+    num_output: 128
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "fc_3"
+  top: "fc_3"
+}
+layer {
+  name: "droppremax"
+  type: "Dropout"
+  bottom: "fc_3"
+  top: "droppremax"
+  include {
+    phase: TRAIN
+  }
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "premax"
+  type: "Reshape"
+  bottom: "droppremax"
+  top: "premax"
+  reshape_param {
+    shape {
+      dim: 64
+      dim: 64
+      dim: 2
+      dim: 1
+    }
+  }
+}
+layer {
+  name: "maxout"
+  type: "Pooling"
+  bottom: "premax"
+  top: "maxout"
+  pooling_param {
+    pool: MAX
+    global_pooling: true
+  }
+}
+layer {
+  name: "fc_classes"
+  type: "InnerProduct"
+  bottom: "maxout"
+  top: "fc_classes"
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "class_proba"
+  type: "Softmax"
+  bottom: "fc_classes"
+  top: "class_proba"
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "fc_classes"
+  bottom: "label"
+  top: "loss"
+}
+layer {
+  name: "acc"
+  type: "Accuracy"
+  bottom: "fc_classes"
+  bottom: "label"
+  top: "acc"
+}
