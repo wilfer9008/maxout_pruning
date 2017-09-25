@@ -182,7 +182,7 @@ def neuron_pruning(solver_net, size_fc, sizeTrain, batchS, k, pruned):
 
 def run_solver(niter = 10000, disp_interval=500, test_interval=12000,
                step_size=1500, learning_rate=0.01, momentum=0.9,
-               batchSize = 64, size_fc=128, k = 4):
+               batchSize = 64, size_fc=128, k = 4, weight_dir=None):
 
     '''
     Runs the solver, training, pruning and testing the network
@@ -195,6 +195,7 @@ def run_solver(niter = 10000, disp_interval=500, test_interval=12000,
     @param batchSize: Batch size
     @param size_fc: Number of neurons in last fully connected layer
     @param k: k value(see paper), number of neurons per maxout unit
+    @param weight_dir: PAth for saving the weights
     '''
     
     accuracies_all_nets = np.zeros(k)
@@ -216,8 +217,10 @@ def run_solver(niter = 10000, disp_interval=500, test_interval=12000,
         accuracies = train(solver, niter, sizeTest, disp_interval, test_interval)
         accuracies_all_nets[pruned + 1 ] = accuracies[-1] * 100
         print "Final Accuracy ", accuracies[-1] * 100, "%\n"
-        
-    print accuracies_all_nets
+       
+    print "Accuracies throughout all the pruning" 
+    for n, accs in enumerate(accuracies_all_nets):
+        print "Pruned iteration: ", n, " Accuracy: ", accs
 
 
     # Saving the learned weights.
@@ -244,7 +247,7 @@ if __name__ == '__main__':
     sizeTest = 10000
     sizeTrain = 60000
     batchSize = 64
-    epochs = 4
+    epochs = 5
     niter = epochs * (sizeTrain // batchSize) + 1
     disp_interval = niter // 50
     test_interval = niter // 2
@@ -263,5 +266,5 @@ if __name__ == '__main__':
     
     run_solver(niter, disp_interval, test_interval,
                step_size, learning_rate, momentum,
-               batchSize, size_fc, k)
+               batchSize, size_fc, k, weight_dir)
     print 'Done'

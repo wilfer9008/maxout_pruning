@@ -20,6 +20,10 @@ class mnist(object):
     def __init__(self, lmdb_train_path, lmdb_test_path, prototxt_path):
         '''
         Constructor
+    
+        @param lmdb_train_path: Path to train dataset
+        @param lmdb_test_path: Path to test dataset
+        @param prototxt_path: Path for saving prototxt files
         '''
         
         self.lmdb_train_path = lmdb_train_path
@@ -30,8 +34,16 @@ class mnist(object):
 
     def get_mnist_dnn(self, img_lmdb_path, num_classes, batch_size, layers_size=[512, 512, 512], use_maxout=False, train = True, k = 2):
         '''
-        Returns a simple four layer dnn
-        cf. baseline system
+        Creating fully connected network for Mnist
+    
+        @param img_lmdb_path: Path to the lmdb dataset
+        @param num_classes: Number of classes
+        @param batch_size: Batch size
+        @param layers_size: Number of neurons per layer
+        @param use_maxout: For using maxout units, dafault False
+        @param train: For defining a train network (true) or test network (false)
+        @param k: k value(see paper), number of neurons per maxout unit
+        
         '''
         n = caffe.NetSpec()
         
@@ -75,8 +87,16 @@ class mnist(object):
     
     def get_mnist_lenet(self, img_lmdb_path, num_classes, batch_size, layers_size=[20, 50, 512], use_maxout=False, train = True, k = 2):
         '''
-        Returns the lenet
-        cf. baseline system
+        Creating convolutional neural network (LeNet) for Mnist
+    
+        @param img_lmdb_path: Path to the lmdb dataset
+        @param num_classes: Number of classes
+        @param batch_size: Batch size
+        @param layers_size: Number of neurons per layer
+        @param use_maxout: For using maxout units, dafault False
+        @param train: For defining a train network (true) or test network (false)
+        @param k: k value(see paper), number of neurons per maxout unit
+        
         '''
         n = caffe.NetSpec()
         
@@ -116,8 +136,46 @@ class mnist(object):
         
         return n.to_proto()
     
+    
+
+    def get_proto(self, lmdb_path, cnn_type='dnn', batch_size=64, fcSize = [512, 512, 128], train_n=True, k=2, use_maxout=True):
+
+        '''
+        Get proto of a network
+    
+        @param lmdb_path: Path to the lmdb dataset
+        @param cnn_type: dnn or lenet type
+        @param batch_size: Batch size
+        @param fcSize: Number of neurons per layer
+        @param train_n: For defining a train network (true) or test network (false)
+        @param k: k value(see paper), number of neurons per maxout unit
+        @param use_maxout: For using maxout units, dafault True
+        
+        '''
+        
+        
+        if cnn_type == 'dnn':
+            return str(self.get_mnist_dnn(lmdb_path, 10, batch_size, layers_size = fcSize, use_maxout=use_maxout, train=train_n, k=k))
+        if cnn_type == 'lenet':
+            return str(self.get_mnist_lenet(lmdb_path, 10, batch_size, layers_size = fcSize, use_maxout=use_maxout, train=train_n, k=k))
+    
 
     def create_solver(self, idx, size_fc, niter, learning_rate, step_size, momentum, batch_size, old_solver = None, k=2, use_maxout=True):
+        '''
+        Create solver, train and test networks
+    
+        @param idx: Id of the solver, with each pruning iteration idx augments
+        @param size_fc: Number of neurons per layer
+        @param niter: Number of iterations
+        @param learning_rate: Learning rate
+        @param step_size: Step size
+        @param momentum: Momentum for SGD (inv used)
+        @param batch_size: batch_size for training
+        @param old_solver: Network to be pruned
+        @param k: k value(see paper), number of neurons per maxout unit
+        @param use_maxout: For using maxout units, dafault True
+        
+        '''
         
         train_dnn = self.get_proto(self.lmdb_train_path, cnn_type='lenet', batch_size=batch_size, fcSize=size_fc, train_n=True, k=k, use_maxout=use_maxout)
         test_dnn = self.get_proto(self.lmdb_test_path, cnn_type='lenet', batch_size=1, fcSize=size_fc, train_n=False, k=k, use_maxout=use_maxout)
@@ -166,13 +224,6 @@ class mnist(object):
         
         return solver
     
-
-    def get_proto(self, lmdb_path, cnn_type='dnn', batch_size=64, fcSize = [512, 512, 128], train_n=True, k=2, use_maxout=True):
-        
-        if cnn_type == 'dnn':
-            return str(self.get_mnist_dnn(lmdb_path, 10, batch_size, layers_size = fcSize, use_maxout=use_maxout, train=train_n, k=k))
-        if cnn_type == 'lenet':
-            return str(self.get_mnist_lenet(lmdb_path, 10, batch_size, layers_size = fcSize, use_maxout=use_maxout, train=train_n, k=k))
         
         
 
@@ -182,7 +233,12 @@ class mnist(object):
         
         file_path: the file path that will be written to
         line_list: the list of strings that will be written
-        '''        
+    
+        @param file_path: Path of the file to be saved
+        @param line_list: list
+        @param encoding: ascii
+        
+        '''       
         with io.open(file_path, 'w', encoding=encoding) as f:
             for l in line_list:
                 f.write(unicode(l) + '\n')
