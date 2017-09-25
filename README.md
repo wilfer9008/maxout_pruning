@@ -1,5 +1,8 @@
 # Maxout pruning
 
+![Maxout pruning](method.png)
+
+
 This git contains the implementation in python using caffe of the paper [Neuron Pruning for Compressing Deep Networks Using Maxout Architectures](https://link.springer.com/chapter/10.1007/978-3-319-66709-6_15).
 
 It provides a simple example of the size-reduction of a conv neural network using maxout units for classifying the MNIST dataset using the LeNet (method used also for face-identification on VGGdataset).
